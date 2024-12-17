@@ -4,7 +4,7 @@ import requests
 
 subreddit_url = 'https://www.reddit.com/r/ChronicPain/'
 
-response = requests.get(subreddit_url)
+response = requests.get(subreddit_url, timeout=60)
 
 soup = BeautifulSoup(response.text, 'html.parser')
 post_links = soup.select('shreddit-post a[slot="full-post-link"]')
