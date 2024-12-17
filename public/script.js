@@ -88,12 +88,13 @@ function updateLayout() {
         .style("stroke-opacity", 0.9)
         .style("fill", "none");
 
-    // Update nodes - FIXED NODE RENDERING
+    // Update nodes
     const nodes = g.selectAll(".node")
         .data(treeData.descendants());
 
     nodes.exit().remove();
 
+    // Handle entering nodes
     const nodeEnter = nodes.enter()
         .append("g")
         .attr("class", "node")
@@ -130,23 +131,26 @@ function updateLayout() {
         .style("stroke", "#fff")
         .style("stroke-width", 2);
 
-    // Update the text labels to only show for root and leaf nodes
+    // Add text for new nodes
     nodeEnter.append("text")
         .attr("dy", ".35em")
         .attr("x", d => d.children ? -13 : 13)
         .attr("text-anchor", d => d.children ? "end" : "start")
-        .text(d => {
-            // Only show text for root node (depth 0) or leaf nodes (no children)
-            if (d.depth === 0 || !d.children) {
-                return d.data.author;
-            }
-            return ""; // Return empty string for intermediate nodes
-        })
         .style("fill", "#333")
         .style("font-size", "12px");
 
+    // Update BOTH new and existing text elements
+    nodes.select("text")  // Update existing
+        .merge(nodeEnter.select("text"))  // Merge with new
+        .text(d => {
+            if (d.depth === 0 || !d.children) {
+                return d.data.author;
+            }
+            return "";
+        });
+
     // Update existing nodes position
-    const nodeUpdate = nodes.merge(nodeEnter)
+    nodes.merge(nodeEnter)
         .transition()
         .duration(750)
         .attr("transform", d => isHorizontal 
