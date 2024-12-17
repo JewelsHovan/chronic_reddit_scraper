@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reddit Comment Tree</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        #tree-container {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            position: relative;
+            height: 90vh;
+            margin: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #tree-container svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .node circle {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .node text {
+            font-family: Arial, sans-serif;
+            font-weight: 500;
+        }
+
+        .link {
+            fill: none;
+            stroke: #ccc;
+            stroke-opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .tooltip {
+            position: absolute;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            border-radius: 6px;
+            pointer-events: none;
+            font-size: 12px;
+            font-family: Arial, sans-serif;
+            max-width: 300px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border: 1px solid #ddd;
+        }
+
+        .tooltip hr {
+            border: none;
+            border-top: 1px solid #ddd;
+        }
+
+        .comment-panel {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            padding: 20px;
+            overflow-y: auto;
+            position: absolute; 
+            top: 20px;
+            right: 20px; 
+            width: 350px;
+            height: calc(85vh - 40px);
+        }
+
+        .comment-panel-title {
+            margin: 0 0 20px 0;
+            color: #2378ae;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .comment-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #ffffff;
+            border-radius: 6px;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .comment-item:hover {
+            background: #f1f3f5;
+        }
+
+        .comment-author {
+            color: #2378ae;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .comment-text {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        .comment-separator {
+            height: 20px;
+            margin: 10px 0;
+            border-left: 2px solid #ccc;
+            margin-left: 10px;
+        }
+
+        .node {
+            transition: transform 0.3s ease;
+        }
+
+        .link {
+            stroke-width: 1.5px;
+            transition: all 0.3s ease;
+        }
+
+        #toggle-button {
+            position: fixed;
+            bottom: 5vh;
+            right: 390px;
+            z-index: 1000;
+            padding: 12px 24px;
+            background-color: #2378ae;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        #toggle-button:hover {
+            background-color: #1a5276;
+            transform: scale(1.05);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            font-family: Arial, sans-serif;
+        }
+
+        .header h1 {
+            color: #2378ae;
+            font-size: 36px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Reddit Comments Visualizer</h1>
+    </div>
+    <div id="tree-container">
+        <button id="toggle-button">Toggle Layout</button>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
