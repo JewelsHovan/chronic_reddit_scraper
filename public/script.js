@@ -129,12 +129,18 @@ function updateLayout() {
         .style("stroke", "#fff")
         .style("stroke-width", 2);
 
-    // Add labels to nodes
+    // Update the text labels to only show for root and leaf nodes
     nodeEnter.append("text")
         .attr("dy", ".35em")
         .attr("x", d => d.children ? -13 : 13)
         .attr("text-anchor", d => d.children ? "end" : "start")
-        .text(d => d.data.author)
+        .text(d => {
+            // Only show text for root node (depth 0) or leaf nodes (no children)
+            if (d.depth === 0 || !d.children) {
+                return d.data.author;
+            }
+            return ""; // Return empty string for intermediate nodes
+        })
         .style("fill", "#333")
         .style("font-size", "12px");
 
@@ -168,7 +174,7 @@ function transformData(post) {
 }
 
 // Replace the existing data loading section
-d3.json("posts_data_20241217_000658.json").then(postsData => {
+d3.json("../data/posts_data_20241217_000658.json").then(postsData => {
     posts = postsData;
     
     // Create post selector
