@@ -16,7 +16,7 @@ def scrape_post(url):
     Scrapes a Reddit post URL and returns structured post data with comments.
     """
     try:
-        response = requests.get(url, headers=REDDIT_HEADERS)
+        response = requests.get(url, headers=REDDIT_HEADERS, timeout=60)
         response.raise_for_status()
 
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -111,7 +111,7 @@ def fetch_more_replies(more_replies_url):
     print(f"Fetching more replies from: {full_url}")
     
     try:
-        response = requests.get(full_url, headers=REDDIT_HEADERS)
+        response = requests.get(full_url, headers=REDDIT_HEADERS, timeout=60)
         response.raise_for_status()
         
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -136,7 +136,7 @@ def extract_comments(post_id):
     comments_url = f"https://www.reddit.com/svc/shreddit/comments/r/chronicpain/{post_id}?render-mode=partial&is_lit_ssr=false"
     
     try:
-        response = requests.get(comments_url, headers=REDDIT_HEADERS)
+        response = requests.get(comments_url, headers=REDDIT_HEADERS, timeout=60)
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
         print(f"Error fetching comments: {e}")
