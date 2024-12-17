@@ -63,8 +63,21 @@ function updateLayout() {
     tree.size(isHorizontal ? [height, width * 0.8] : [width, height * 0.6]);
     let treeData = tree(root);
 
-    // Update links
-    const links = g.selectAll(".link")
+    // Create a group for links that will be rendered first
+    const linksGroup = g.selectAll(".links-group").data([null]);
+    linksGroup.enter()
+        .append("g")
+        .attr("class", "links-group");
+
+    // Create a group for nodes that will be rendered on top
+    const nodesGroup = g.selectAll(".nodes-group").data([null]);
+    nodesGroup.enter()
+        .append("g")
+        .attr("class", "nodes-group");
+
+    // Update links (now specifically in the links group)
+    const links = g.select(".links-group")
+        .selectAll(".link")
         .data(treeData.links());
 
     links.exit().remove();
@@ -73,7 +86,7 @@ function updateLayout() {
         .append("path")
         .attr("class", "link");
 
-    const linkUpdate = linkEnter.merge(links)
+    linkEnter.merge(links)
         .transition()
         .duration(750)
         .attr("d", isHorizontal 
@@ -88,8 +101,9 @@ function updateLayout() {
         .style("stroke-opacity", 0.9)
         .style("fill", "none");
 
-    // Update nodes
-    const nodes = g.selectAll(".node")
+    // Update nodes (now specifically in the nodes group)
+    const nodes = g.select(".nodes-group")
+        .selectAll(".node")
         .data(treeData.descendants());
 
     nodes.exit().remove();
