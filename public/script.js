@@ -126,7 +126,7 @@ function updateLayout() {
 
     // Add circles to nodes
     nodeEnter.append("circle")
-        .attr("r", 5)
+        .attr("r", 8)
         .style("fill", d => d.depth === 0 ? "#2378ae" : "#ff7f0e")
         .style("stroke", "#fff")
         .style("stroke-width", 2);
@@ -148,6 +148,10 @@ function updateLayout() {
             }
             return "";
         });
+    
+    // Add this new attribute to control text visibility
+    nodes.select("text")
+        .attr("visibility", showNames ? "visible" : "hidden");
 
     // Update existing nodes position
     nodes.merge(nodeEnter)
@@ -271,6 +275,31 @@ function updateCommentChain(node) {
 d3.select("#toggle-button")
     .on("click", () => {
         isHorizontal = !isHorizontal;
+        updateLayout();
+    });
+
+// Add this new button
+let showNames = true;
+d3.select("#tree-container")
+    .append("button")
+    .attr("id", "toggle-names-button")
+    .style("position", "fixed")
+    .style("bottom", "5vh")
+    .style("right", "625px")
+    .style("z-index", "1000")
+    .style("padding", "12px 24px")
+    .style("background-color", "#2378ae")
+    .style("color", "white")
+    .style("border", "none")
+    .style("border-radius", "5px")
+    .style("cursor", "pointer")
+    .style("font-family", "Arial, sans-serif")
+    .style("font-size", "16px")
+    .style("box-shadow", "0 2px 4px rgba(0,0,0,0.2)")
+    .style("transition", "background-color 0.3s ease, transform 0.2s ease")
+    .text("Toggle Names")
+    .on("click", () => {
+        showNames = !showNames;
         updateLayout();
     });
 
