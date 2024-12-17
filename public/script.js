@@ -78,14 +78,15 @@ function updateLayout() {
         .duration(750)
         .attr("d", isHorizontal 
             ? d3.linkHorizontal()
-                .x(d => d.y * 0.9)
+                .x(d => d.y)
                 .y(d => d.x)
             : d3.linkVertical()
                 .x(d => d.x)
-                .y(d => d.y * 0.9))
+                .y(d => d.y))
         .style("stroke", "#666")
         .style("stroke-width", d => Math.max(1.5, 4 - d.target.depth * 0.5))
-        .style("stroke-opacity", 0.9);
+        .style("stroke-opacity", 0.9)
+        .style("fill", "none");
 
     // Update nodes - FIXED NODE RENDERING
     const nodes = g.selectAll(".node")
@@ -124,7 +125,7 @@ function updateLayout() {
 
     // Add circles to nodes
     nodeEnter.append("circle")
-        .attr("r", 6)
+        .attr("r", 5)
         .style("fill", d => d.depth === 0 ? "#2378ae" : "#ff7f0e")
         .style("stroke", "#fff")
         .style("stroke-width", 2);
@@ -174,7 +175,7 @@ function transformData(post) {
 }
 
 // Replace the existing data loading section
-d3.json("../data/posts_data_20241217_000658.json").then(postsData => {
+d3.json("posts_data_20241217_000658.json").then(postsData => {
     posts = postsData;
     
     // Create post selector
