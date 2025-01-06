@@ -104,7 +104,9 @@ if __name__ == "__main__":
     session = requests.Session()
     session.headers.update(REDDIT_HEADERS)
 
-    new_posts = get_reddit_posts(initial_url, num_posts=100, session=session)
+    NUM_POSTS = 1500
+
+    new_posts = get_reddit_posts(initial_url, num_posts=NUM_POSTS, session=session)
     print(f"Found {len(new_posts)} new post links")
     
     for url in new_posts:

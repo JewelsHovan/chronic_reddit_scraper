@@ -161,9 +161,8 @@ if __name__ == "__main__":
     with open('data/reddit_posts.json', 'r') as file:
         reddit_posts = json.load(file)
 
-    # Process up to 10 posts and store results
     processed_posts = []
-    for post_url in reddit_posts[:10]:  # Limit to first 10 posts
+    for post_url in reddit_posts:  
         full_url = f"{BASE_URL}{post_url}"
         print(f"Scraping: {full_url}")
         post_data = scrape_post(full_url)
