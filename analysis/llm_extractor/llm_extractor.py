@@ -1,7 +1,6 @@
 from typing import List, Dict, Any
 import litellm
-from .prompts import lexicon_expansion_prompt, pain_context_classification_prompt, slang_generation_prompt
-
+from prompts import lexicon_expansion_prompt, pain_context_classification_prompt, slang_generation_prompt
 
 
 class LLMExtractor:
