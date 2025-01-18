@@ -5,9 +5,9 @@ from tqdm import tqdm
 import json
 from config.headers import REDDIT_HEADERS
 from datetime import datetime, timedelta
-import random
 import time
 import os
+import secrets
 
 # Updated Configuration constants
 MAX_WORKERS = 5
@@ -99,7 +99,7 @@ async def scrape_post(session, url, semaphore, rate_limiter):
         except (aiohttp.ClientError, asyncio.TimeoutError) as e:
             if isinstance(e, aiohttp.ClientResponseError) and e.status == 429:
                 print(f"Rate limited while scraping {url}. Retrying with exponential backoff...")
-                await asyncio.sleep(random.uniform(2, 10))  # Wait for a random time before retrying
+                await asyncio.sleep(secrets.SystemRandom().uniform(2, 10))  # Wait for a random time before retrying
                 return await scrape_post(session, url, semaphore, rate_limiter)  # Retry the request
             else:
                 print(f"An error occurred while scraping {url}: {e}")
