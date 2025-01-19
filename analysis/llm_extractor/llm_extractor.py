@@ -1,6 +1,14 @@
 from typing import List, Dict, Any
 import litellm
 from prompts import lexicon_expansion_prompt, pain_context_classification_prompt, slang_generation_prompt
+from analysis.llm_extractor.structured_outputs import (
+    get_structured_lexicon_extraction,
+    get_structured_pain_context_classification,
+    get_structured_slang_generation,
+    LexiconExtraction,
+    PainContextClassifications,
+    SlangGeneration,
+)
 
 
 class LLMExtractor:
@@ -27,44 +35,38 @@ class LLMExtractor:
         # but we'll keep this method to maintain the model_name
         return model_name
 
-    def extract_lexicon(self, data: List[str]) -> List[str]:
+    def extract_lexicon(self, data: List[str]) -> LexiconExtraction:
         """
         Extracts lexicon items using litellm.completion and the lexicon_expansion_prompt.
         """
         prompt = lexicon_expansion_prompt
         messages = [
             {"role": "system", "content": prompt},
-            {"role": "user", "content": str(data)}  # Pass data directly as a string
+            {"role": "user", "content": str(data)},
         ]
-        response = litellm.completion(model=self.model_name, messages=messages)
-        extracted_items = response.choices[0].message.content.strip().split("\n")
-        return extracted_items
+        return get_structured_lexicon_extraction(self.model_name, messages)
 
-    def classify_pain_context(self, data: List[str]) -> Dict[str, Any]:
+    def classify_pain_context(self, data: List[str]) -> PainContextClassifications:
         """
         Classifies pain context using litellm.completion and the pain_context_classification_prompt.
         """
         prompt = pain_context_classification_prompt
         messages = [
             {"role": "system", "content": prompt},
-            {"role": "user", "content": str(data)}  # Pass data directly as a string
+            {"role": "user", "content": str(data)},
         ]
-        response = litellm.completion(model=self.model_name, messages=messages)
-        classification_result = response.choices[0].message.content.strip()
-        return {"classification": classification_result}
+        return get_structured_pain_context_classification(self.model_name, messages)
 
-    def generate_slang(self, data: List[str]) -> List[str]:
+    def generate_slang(self, data: List[str]) -> SlangGeneration:
         """
         Generates slang terms using litellm.completion and the slang_generation_prompt.
         """
         prompt = slang_generation_prompt
         messages = [
             {"role": "system", "content": prompt},
-            {"role": "user", "content": str(data)}  # Pass data directly as a string
+            {"role": "user", "content": str(data)},
         ]
-        response = litellm.completion(model=self.model_name, messages=messages)
-        slang_terms = response.choices[0].message.content.strip().split("\n")
-        return slang_terms
+        return get_structured_slang_generation(self.model_name, messages)
 
     def process_post(self, post: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -93,9 +95,9 @@ class LLMExtractor:
         # Attach the LLM outputs to the post dictionary:
         output = {
             **post,  # Include the original post data
-            "extracted_lexicon": extracted_lexicon,
-            "pain_context_classification": classified_context,
-            "slang_terms": generated_slang
+            "extracted_lexicon": extracted_lexicon.model_dump(),
+            "pain_context_classification": classified_context.model_dump(),
+            "slang_terms": generated_slang.model_dump()
         }
         return output
 

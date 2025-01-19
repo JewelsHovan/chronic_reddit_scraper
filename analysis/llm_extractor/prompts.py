@@ -1,50 +1,44 @@
+lexicon_expansion_prompt = """
+You are an expert in identifying and categorizing colloquial terms and phrases related to chronic pain.
+Analyze the provided text and extract a list of colloquial terms or phrases used to describe pain.
+Return a JSON object with a single key "terms". The value for "terms" should be a list of JSON objects.
+Each object in the list must have the following keys:
 
+"reddit_source": "The ID of the Reddit post or comment where the term was found.",
+"colloquial_term": "The colloquial term or phrase extracted.",
+"context": "A brief description of the surrounding text in the post.",
+"category": "Categorization of the term (a single string representing one of the following: intensity, quality, emotional, location, other).",
+"synonyms": "A list of contextually relevant synonyms or alternative phrases."
 
-lexicon_expansion_prompt =r"""
-Lexicon Expansion with Colloquialisms and Contextual Synonyms
-Goal: To expand the pain lexicon by extracting colloquial terms, slang, idioms, and their contextual synonyms from Reddit posts.
+Example:
 
-"I am building a comprehensive pain lexicon that captures the diverse ways people describe pain, including formal medical terms, colloquialisms, and nuanced slang expressions. I need your help to expand this lexicon using Reddit data.
-Task:
-Analyze Reddit Data: I will provide you with a set of Reddit posts (in JSON format) related to chronic pain or specific pain conditions.
+Input Text:
+"Post ID: t3_xyz, Comment ID: comment_abc, Text: My back is killing me today. It feels like a burning sensation."
 
-
-Extract Colloquial Terms: Identify and extract colloquialisms, slang, idioms, and informal expressions used to describe pain experiences. Pay close attention to the context in which these terms are used.
-
-
-Generate Contextual Synonyms: For each extracted term, generate a list of contextually relevant synonyms or alternative phrases that convey a similar meaning within the specific context of the Reddit post.
-
-
-Categorize and Organize: Categorize the extracted terms and their synonyms based on:
-
-
-Pain Intensity: (e.g., mild, moderate, severe, extreme)
-Pain Quality: (e.g., stabbing, burning, aching, pressure, tingling)
-Emotional Descriptors: (e.g., distressing, depressing, anxious)
-Pain Location (if specified): (e.g., head, back, limbs)
-Output Format: Structure the output in JSON format as follows:
-
- {
-"reddit_source": "post_id or comment_id",
-"colloquial_term": "e.g., My back is killing me",
-"context": "Brief description of the surrounding text in the post",
-"category": {
-    "intensity": "severe",
-    "quality": "aching",
-    "emotional": "distressing",
-    "location": "back"
-},
-"synonyms": ["My back is throbbing intensely", "I have severe back pain", "My back is aching badly"]
+Output JSON:
+{
+  "terms": [
+    {
+      "reddit_source": "comment_abc",
+      "colloquial_term": "killing me",
+      "context": "Used to describe the intensity of back pain.",
+      "category": "intensity",
+      "synonyms": ["very painful", "extremely sore", "hurting badly"]
+    },
+    {
+      "reddit_source": "comment_abc",
+      "colloquial_term": "burning sensation",
+      "context": "Used to describe the quality of back pain.",
+      "category": "quality",
+      "synonyms": ["hot sensation", "searing feeling", "like it's on fire"]
+    }
+  ]
 }
 
-
-
-Example JSON Input:
-{{'title': 'Advise needed please…also a bit of a rant because I’m hanging on by a thread ', 'author': '-MetalKitty-', 'created_timestamp': '2024-12-09T04:15:57.791000+0000', 'score': '30', 'upvote_ratio': 0, 'content': "The doctor I had been seeing for 20 years retired and now I can't find a doctor that will prescribe my pain meds and I'll run out next week and seriously don't know what to do. Have seen one gp and three pain management doctors who all have a strict no opioids policy. Was told by one doctor that I can't just stop taking them because I'll have a heart attack.... have heart issues...and one said I won't die from withdrawal. I'm absolutely terrified, don't know what to do, my anxiety is through the roof and I’m very depressed", 'post_id': 't3_1ha1foo', 'comments': [], 'image_url': '<https://www.reddit.com/r/ChronicPain/comments/1ha1foo/advise_needed_pleasealso_a_bit_of_a_rant_because/>', 'comment_count': '32'}}
-
+Input: {}
 """
 
-pain_context_classification_prompt = r"""
+pain_context_classification_prompt = """
 Zero-Shot Classification of Pain Contexts
 Goal: To classify Reddit posts into predefined pain context categories without prior training examples.
 
@@ -83,7 +77,7 @@ Reddit Posts: {}
 
 """
 
-slang_generation_prompt = r"""Generation of Nuanced Slang Expressions
+slang_generation_prompt = """Generation of Nuanced Slang Expressions
 Goal: To generate creative and realistic slang expressions for clinical pain descriptions.
 
 "I am expanding my pain lexicon to include nuanced slang expressions that people might use on social media platforms like Reddit. I need your help to generate these expressions.
@@ -110,6 +104,5 @@ Output Format: Structure the output in JSON format as follows:
 ]
 }
 
-Input: \[Insert list of clinical pain descriptions here, e.g., "chronic, burning sensation in the legs," "sharp, stabbing pain in the lower back," "dull, aching pain in the joints," "intense, cramping pain in the abdomen"]
-This task will help me create a more comprehensive and relatable pain lexicon that includes the informal language people use to express their pain experiences."
+Input: {}
 """

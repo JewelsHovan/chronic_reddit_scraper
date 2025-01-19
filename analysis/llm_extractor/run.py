@@ -1,4 +1,5 @@
 import json
+from tqdm import tqdm
 from llm_extractor import LLMExtractor
 
 def main():
@@ -8,6 +9,7 @@ def main():
     """
     data_path = '/Users/julienh/Desktop/McGillWork/PainLexicon/chronic_reddit_scraper/posts_data_20250110_152846.json'  # Update with the actual path
     output_path = 'processed_posts.json'  # Update with desired output path
+    num_posts_to_process = 3
 
     try:
         with open(data_path, 'r', encoding='utf-8') as f:
@@ -19,11 +21,11 @@ def main():
         print(f"Error: Invalid JSON format in {data_path}")
         return
 
-    model_name = "openai/gpt-4o"  # Update with your desired model
+    model_name = "openai/gpt-4o-mini"  # Update with your desired model
     extractor = LLMExtractor(model_name)
 
     processed_posts = []
-    for post in posts_data:
+    for post in tqdm(posts_data[:num_posts_to_process], desc="Processing posts"):
         try:
             processed_post = extractor.process_post(post)
             processed_posts.append(processed_post)
@@ -39,6 +41,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
