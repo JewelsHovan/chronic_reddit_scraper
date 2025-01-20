@@ -21,7 +21,7 @@ def main():
     # Select a small subset of posts for testing (e.g., first 3 posts)
     test_posts = posts_data[:3]
 
-    model_name = "openai/gpt-4o-mini"  # Update with your desired model
+    model_name = "openai/gpt-4o"  # Update with your desired model
     extractor = LLMExtractor(model_name)
 
     processed_posts = []

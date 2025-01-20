@@ -1,12 +1,12 @@
 from typing import List, Dict, Any
 import litellm
-from prompts import lexicon_expansion_prompt, pain_context_classification_prompt, slang_generation_prompt
+from prompts import lexicon_expansion_prompt, content_analysis_prompt, slang_generation_prompt
 from analysis.llm_extractor.structured_outputs import (
     get_structured_lexicon_extraction,
-    get_structured_pain_context_classification,
     get_structured_slang_generation,
+    get_structured_content_analysis,
     LexiconExtraction,
-    PainContextClassifications,
+    ContentAnalysis,
     SlangGeneration,
 )
 
@@ -35,36 +35,36 @@ class LLMExtractor:
         # but we'll keep this method to maintain the model_name
         return model_name
 
-    def extract_lexicon(self, data: List[str]) -> LexiconExtraction:
+    def extract_lexicon(self, data: str) -> LexiconExtraction:
         """
         Extracts lexicon items using litellm.completion and the lexicon_expansion_prompt.
         """
         prompt = lexicon_expansion_prompt
         messages = [
             {"role": "system", "content": prompt},
-            {"role": "user", "content": str(data)},
+            {"role": "user", "content": data},
         ]
         return get_structured_lexicon_extraction(self.model_name, messages)
 
-    def classify_pain_context(self, data: List[str]) -> PainContextClassifications:
+    def extract_content_analysis(self, data: str) -> ContentAnalysis:
         """
-        Classifies pain context using litellm.completion and the pain_context_classification_prompt.
+        Extracts content analysis using litellm.completion and the content_analysis_prompt.
         """
-        prompt = pain_context_classification_prompt
+        prompt = content_analysis_prompt
         messages = [
             {"role": "system", "content": prompt},
-            {"role": "user", "content": str(data)},
+            {"role": "user", "content": data},
         ]
-        return get_structured_pain_context_classification(self.model_name, messages)
+        return get_structured_content_analysis(self.model_name, messages)
 
-    def generate_slang(self, data: List[str]) -> SlangGeneration:
+    def generate_slang(self, data: str) -> SlangGeneration:
         """
         Generates slang terms using litellm.completion and the slang_generation_prompt.
         """
         prompt = slang_generation_prompt
         messages = [
             {"role": "system", "content": prompt},
-            {"role": "user", "content": str(data)},
+            {"role": "user", "content": data},
         ]
         return get_structured_slang_generation(self.model_name, messages)
 
@@ -76,27 +76,19 @@ class LLMExtractor:
         :return: A dictionary containing the original post data plus results
                  from extraction, classification, and slang generation.
         """
-        # Convert relevant text fields into a list that each method can process
-        # For example, combine title and content, or also include comment texts.
-        combined_text = []
-        if "title" in post:
-            combined_text.append(post["title"])
-        if "content" in post:
-            combined_text.append(post["content"])
-        if "comments" in post:
-            for comment_info in post["comments"]:
-                combined_text.append(comment_info.get("text", ""))
+        # Pass the entire post dictionary as a string
+        post_string = str(post)
 
         # Extract lexicon, classify pain context, and generate slang
-        extracted_lexicon = self.extract_lexicon(combined_text)
-        classified_context = self.classify_pain_context(combined_text)
-        generated_slang = self.generate_slang(combined_text)
+        extracted_lexicon = self.extract_lexicon(post_string)
+        extracted_content = self.extract_content_analysis(post_string)
+        generated_slang = self.generate_slang(post_string)
 
         # Attach the LLM outputs to the post dictionary:
         output = {
             **post,  # Include the original post data
             "extracted_lexicon": extracted_lexicon.model_dump(),
-            "pain_context_classification": classified_context.model_dump(),
+            "content_analysis": extracted_content.model_dump(),
             "slang_terms": generated_slang.model_dump()
         }
         return output

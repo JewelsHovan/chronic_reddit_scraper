@@ -5,30 +5,55 @@ from pydantic import BaseModel, Field, field_validator
 
 
 class ColloquialTerm(BaseModel):
-    reddit_source: str = Field(..., description="The ID of the Reddit post or comment.")
-    colloquial_term: str = Field(..., description="The colloquial term or phrase extracted from the post.")
-    context: str = Field(..., description="A brief description of the surrounding text in the post.")
-    category: str = Field(
-        ...,
-        description="Categorization of the term (intensity, quality, emotional, location, or other).",
-    )
-    synonyms: List[str] = Field(
-        ..., description="A list of contextually relevant synonyms or alternative phrases."
-    )
+    term: str = Field(..., description="The colloquial term or phrase")
+    context: str = Field(..., description="Brief description of how the term is used")
+    category: str = Field(..., description="Basic category: physical, emotional, or intensity")
 
     @field_validator('category')
     def validate_category(cls, v):
-        valid_categories = ['intensity', 'quality', 'emotional', 'location', 'other']
-        if v not in valid_categories:
+        valid_categories = ['physical', 'emotional', 'intensity']
+        if v.lower() not in valid_categories:
             raise ValueError(f'Category must be one of {valid_categories}')
-        return v
+        return v.lower()
 
 class LexiconExtraction(BaseModel):
     terms: List[ColloquialTerm]
 
-class PainContextClassification(BaseModel):
-    context: str = Field(..., description="The pain context label.")
-    confidence: float = Field(..., description="The confidence score for the classification (0.0 to 1.0).")
+class SlangGeneration(BaseModel):
+    clinical_term: str = Field(..., description="The formal medical term")
+    colloquial_expressions: List[str] = Field(..., description="Natural language expressions")
+
+class SentimentDetails(BaseModel):
+    score: float = Field(..., description="Sentiment score from -1.0 to 1.0")
+    primary_tone: str = Field(..., description="Primary emotional tone")
+    key_phrases: List[str] = Field(..., description="Supporting phrases from the text")
+
+    @field_validator('score')
+    def validate_score(cls, v):
+        if not -1.0 <= v <= 1.0:
+            raise ValueError('Sentiment score must be between -1.0 and 1.0')
+        return v
+
+class EmotionalIntensity(BaseModel):
+    score: float = Field(..., description="Intensity score from 0.0 to 1.0")
+    indicators: List[str] = Field(..., description="Supporting intensity indicators")
+
+    @field_validator('score')
+    def validate_score(cls, v):
+        if not 0.0 <= v <= 1.0:
+            raise ValueError('Intensity score must be between 0.0 and 1.0')
+        return v
+
+class PainLevel(BaseModel):
+    score: int = Field(..., description="Pain level from 0-10, or -1 if undetermined")
+    confidence: float = Field(..., description="Confidence score from 0.0 to 1.0")
+    contextual_clues: List[str] = Field(..., description="Supporting context from the text")
+
+    @field_validator('score')
+    def validate_score(cls, v):
+        if not -1 <= v <= 10:
+            raise ValueError('Pain score must be between -1 and 10')
+        return v
 
     @field_validator('confidence')
     def validate_confidence(cls, v):
@@ -36,37 +61,35 @@ class PainContextClassification(BaseModel):
             raise ValueError('Confidence score must be between 0.0 and 1.0')
         return v
 
-class PostClassification(BaseModel):
-    post_id: str = Field(
-        default="",
-        description="The ID of the Reddit post."
-    )
-    classifications: List[PainContextClassification] = Field(
-        default_factory=list,
-        description="A list of pain context classifications for the post."
-    )
+class Urgency(BaseModel):
+    level: str = Field(..., description="Urgency level assessment")
+    confidence: float = Field(..., description="Confidence score from 0.0 to 1.0")
+    indicators: List[str] = Field(..., description="Supporting urgency indicators")
 
-class PainContextClassifications(BaseModel):
-    posts: List[PostClassification] = Field(
-        default_factory=list,
-        description="A list of classified Reddit posts."
-    )
+    @field_validator('level')
+    def validate_level(cls, v):
+        valid_levels = ['low', 'moderate', 'high', 'critical']
+        if v.lower() not in valid_levels:
+            raise ValueError(f'Level must be one of {valid_levels}')
+        return v.lower()
 
-class SlangExpression(BaseModel):
-    clinical_description: str = Field(
-        default="",
-        description="The formal or clinical description of pain."
-    )
-    slang_expressions: List[str] = Field(
-        default_factory=list,
-        description="A list of nuanced slang expressions or colloquialisms."
-    )
+    @field_validator('confidence')
+    def validate_confidence(cls, v):
+        if not 0.0 <= v <= 1.0:
+            raise ValueError('Confidence score must be between 0.0 and 1.0')
+        return v
 
-class SlangGeneration(BaseModel):
-    expressions: List[SlangExpression] = Field(
-        default_factory=list,
-        description="A list of generated slang expressions."
-    )
+class TopicClassification(BaseModel):
+    primary_topic: str = Field(..., description="Primary topic of the post")
+    subtopics: List[str] = Field(..., description="Additional topics covered")
+    categories: Dict[str, float] = Field(..., description="Confidence scores for each category")
+
+class ContentAnalysis(BaseModel):
+    sentiment: SentimentDetails
+    emotional_intensity: EmotionalIntensity
+    pain_level: PainLevel
+    urgency: Urgency
+    topic_classification: TopicClassification
 
 def get_structured_lexicon_extraction(
     model: str, messages: List[Dict[str, str]]
@@ -77,18 +100,18 @@ def get_structured_lexicon_extraction(
     response = completion(model=model, messages=messages, response_format={"type": "json_object"})
     return LexiconExtraction.model_validate_json(response.choices[0].message.content)
 
-def get_structured_pain_context_classification(
-    model: str, messages: List[Dict[str, str]]
-) -> PainContextClassifications:
-    """
-    Classifies pain context using litellm.completion and returns a structured output.
-    """
-    response = completion(model=model, messages=messages, response_format={"type": "json_object"})
-    return PainContextClassifications.model_validate_json(response.choices[0].message.content)
-
 def get_structured_slang_generation(model: str, messages: List[Dict[str, str]]) -> SlangGeneration:
     """
     Generates slang terms using litellm.completion and returns a structured output.
     """
     response = completion(model=model, messages=messages, response_format={"type": "json_object"})
-    return SlangGeneration.model_validate_json(response.choices[0].message.content) 
+    return SlangGeneration.model_validate_json(response.choices[0].message.content)
+
+def get_structured_content_analysis(
+    model: str, messages: List[Dict[str, str]]
+) -> ContentAnalysis:
+    """
+    Analyzes content features using litellm.completion and returns a structured output.
+    """
+    response = completion(model=model, messages=messages, response_format={"type": "json_object"})
+    return ContentAnalysis.model_validate_json(response.choices[0].message.content) 
