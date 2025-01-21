@@ -1,32 +1,32 @@
 import os
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Annotated
 from litellm import completion
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, field_validator
 
 
-class ColloquialTerm(BaseModel):
-    term: str = Field(..., description="The colloquial term or phrase")
-    context: str = Field(..., description="Brief description of how the term is used")
-    category: str = Field(..., description="Basic category: physical, emotional, or intensity")
+class PainTerm(BaseModel):
+    term: Annotated[str, "The term or phrase"]
+    context: Annotated[str, "Brief description of how the term is used"]
+    category: Annotated[str, "Category: physical, emotional, intensity, location, temporal, or impact"]
 
     @field_validator('category')
     def validate_category(cls, v):
-        valid_categories = ['physical', 'emotional', 'intensity']
+        valid_categories = ['physical', 'emotional', 'intensity', 'location', 'temporal', 'impact']
         if v.lower() not in valid_categories:
             raise ValueError(f'Category must be one of {valid_categories}')
         return v.lower()
 
 class LexiconExtraction(BaseModel):
-    terms: List[ColloquialTerm]
+    terms: List[PainTerm]
 
 class SlangGeneration(BaseModel):
-    clinical_term: str = Field(..., description="The formal medical term")
-    colloquial_expressions: List[str] = Field(..., description="Natural language expressions")
+    clinical_term: Annotated[Optional[str], "The formal medical term"]
+    colloquial_expressions: Annotated[List[str], "Natural language expressions"]
 
 class SentimentDetails(BaseModel):
-    score: float = Field(..., description="Sentiment score from -1.0 to 1.0")
-    primary_tone: str = Field(..., description="Primary emotional tone")
-    key_phrases: List[str] = Field(..., description="Supporting phrases from the text")
+    score: Annotated[float, "Sentiment score from -1.0 to 1.0"]
+    primary_tone: Annotated[str, "Primary emotional tone"]
+    key_phrases: Annotated[List[str], "Supporting phrases from the text"]
 
     @field_validator('score')
     def validate_score(cls, v):
@@ -34,9 +34,16 @@ class SentimentDetails(BaseModel):
             raise ValueError('Sentiment score must be between -1.0 and 1.0')
         return v
 
+    @field_validator("primary_tone")
+    def validate_primary_tone(cls, v):
+        valid_tones = ["Negative", "Positive", "Neutral", "Ambivalent"]
+        if v not in valid_tones:
+            raise ValueError(f"Primary tone must be one of {valid_tones}")
+        return v
+
 class EmotionalIntensity(BaseModel):
-    score: float = Field(..., description="Intensity score from 0.0 to 1.0")
-    indicators: List[str] = Field(..., description="Supporting intensity indicators")
+    score: Annotated[float, "Intensity score from 0.0 to 1.0"]
+    indicators: Annotated[List[str], "Supporting intensity indicators"]
 
     @field_validator('score')
     def validate_score(cls, v):
@@ -45,9 +52,9 @@ class EmotionalIntensity(BaseModel):
         return v
 
 class PainLevel(BaseModel):
-    score: int = Field(..., description="Pain level from 0-10, or -1 if undetermined")
-    confidence: float = Field(..., description="Confidence score from 0.0 to 1.0")
-    contextual_clues: List[str] = Field(..., description="Supporting context from the text")
+    score: Annotated[int, "Pain level from 0-10, or -1 if undetermined"]
+    confidence: Annotated[float, "Confidence score from 0.0 to 1.0"]
+    contextual_clues: Annotated[List[str], "Supporting context from the text"]
 
     @field_validator('score')
     def validate_score(cls, v):
@@ -62,9 +69,9 @@ class PainLevel(BaseModel):
         return v
 
 class Urgency(BaseModel):
-    level: str = Field(..., description="Urgency level assessment")
-    confidence: float = Field(..., description="Confidence score from 0.0 to 1.0")
-    indicators: List[str] = Field(..., description="Supporting urgency indicators")
+    level: Annotated[str, "Urgency level assessment"]
+    confidence: Annotated[float, "Confidence score from 0.0 to 1.0"]
+    indicators: Annotated[List[str], "Supporting urgency indicators"]
 
     @field_validator('level')
     def validate_level(cls, v):
@@ -80,9 +87,16 @@ class Urgency(BaseModel):
         return v
 
 class TopicClassification(BaseModel):
-    primary_topic: str = Field(..., description="Primary topic of the post")
-    subtopics: List[str] = Field(..., description="Additional topics covered")
-    categories: Dict[str, float] = Field(..., description="Confidence scores for each category")
+    primary_topic: Annotated[str, "Primary topic of the post"]
+    subtopics: Annotated[List[str], "Additional topics covered"]
+    categories: Annotated[Dict[str, float], "Confidence scores for each category"]
+
+    @field_validator('primary_topic')
+    def validate_primary_topic(cls, v):
+        valid_topics = ['Support and Personal Experiences', 'Information and Discussion', 'Community and Social Interaction', 'Humor and Entertainment', 'Reflection and Sentiment', 'Critique and Change', 'Other']
+        if v not in valid_topics:
+            raise ValueError(f"Primary topic must be one of {valid_topics}")
+        return v
 
 class ContentAnalysis(BaseModel):
     sentiment: SentimentDetails

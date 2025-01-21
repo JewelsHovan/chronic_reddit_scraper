@@ -9,7 +9,7 @@ def main():
     """
     data_path = '/Users/julienh/Desktop/McGillWork/PainLexicon/chronic_reddit_scraper/posts_data_20250110_152846.json'  # Update with the actual path
     output_path = 'processed_posts.json'  
-    num_posts_to_process = 100
+    num_posts_to_process = 500
 
     try:
         with open(data_path, 'r', encoding='utf-8') as f:

@@ -5,3 +5,5 @@ data/
 .DS_Store
 
 posts_data_20250110_152846.json
+
+.env
