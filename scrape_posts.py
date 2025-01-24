@@ -132,24 +132,38 @@ async def process_comment(comment_elem, session, depth=0, parent_id=None, rate_l
         'replies': []
     }
 
-    # Process child comments
-    child_comments = comment_elem.find_all('shreddit-comment', attrs={'slot': 'children'}, recursive=False)
+    # Process child comments - Updated to handle nested comments better
+    child_comments = []
     
-    if not child_comments:
-        children_slot = comment_elem.find('div', {'slot': 'children'})
-        if children_slot:
-            child_comments = children_slot.find_all('shreddit-comment', recursive=False)
+    # First check direct children with slot='children'
+    children_slot = comment_elem.find('div', {'slot': 'children'})
+    if children_slot:
+        # Use recursive=True to get all nested comments
+        child_comments.extend(children_slot.find_all('shreddit-comment', recursive=True))
+    
+    # Also check for comments that are direct descendants
+    child_comments.extend(comment_elem.find_all('shreddit-comment', recursive=True))
+    
+    # Remove duplicates while preserving order
+    seen = set()
+    child_comments = [x for x in child_comments if not (x.get('thingid') in seen or seen.add(x.get('thingid')))]
 
     # Process child comments
-    child_tasks = [process_comment(
-        child_elem, 
-        session, 
-        depth + 1, 
-        thing_id, 
-        rate_limiter
-    ) for child_elem in child_comments]
-    child_comments = await asyncio.gather(*child_tasks)
-    comment['replies'].extend(c for c in child_comments if c is not None)
+    child_tasks = []
+    for child_elem in child_comments:
+        # Only process comments that are one level deeper than current
+        if int(child_elem.get('depth', 0)) == depth + 1:
+            child_tasks.append(process_comment(
+                child_elem, 
+                session, 
+                depth + 1, 
+                thing_id, 
+                rate_limiter
+            ))
+    
+    if child_tasks:
+        child_comments = await asyncio.gather(*child_tasks)
+        comment['replies'].extend(c for c in child_comments if c is not None)
 
     # Fetch additional replies if they exist
     if more_replies_link:
