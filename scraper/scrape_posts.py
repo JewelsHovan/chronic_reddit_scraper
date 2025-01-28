@@ -3,13 +3,26 @@ import aiohttp
 from bs4 import BeautifulSoup
 from tqdm import tqdm
 import json
-from config.headers import REDDIT_HEADERS
 from datetime import datetime
 import random
 import os
+from pathlib import Path
+import sys
+
+# Add project root to Python path to enable absolute imports
+PROJECT_ROOT = Path(__file__).parent.parent
+sys.path.append(str(PROJECT_ROOT))
+
 from config.constants import MAX_WORKERS, RATE_LIMIT_REQUESTS, TOKEN_REFRESH_RATE, CHECKPOINT_INTERVAL
+from config.headers import REDDIT_HEADERS
+from config.paths import RAW_DATA_DIR, PARTIAL_DATA_DIR
 from scraper.src.session import RateLimiter
 from scraper.src.utils import extract_post_id, print_comment_tree
+
+# Create directories if they don't exist
+RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
+PARTIAL_DATA_DIR.mkdir(parents=True, exist_ok=True)
+
 
 async def scrape_post(session, url, semaphore, rate_limiter):
     """Updated scrape_post function with rate limiting"""

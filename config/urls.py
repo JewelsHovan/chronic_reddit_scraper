@@ -1,6 +1,8 @@
 from urllib.parse import urlencode
 import uuid
 
+valid_sort_options = {'hot', 'new', 'top', 'rising'}
+
 def generate_navigation_session_id():
     """Generate a new navigation session ID."""
     return str(uuid.uuid4())
@@ -28,7 +30,6 @@ def get_reddit_feed_url(
         str: Generated Reddit feed URL
     """
     # Validate sort_by parameter
-    valid_sort_options = {'hot', 'new', 'top', 'rising'}
     if sort_by not in valid_sort_options:
         raise ValueError(f"sort_by must be one of {valid_sort_options}")
 
