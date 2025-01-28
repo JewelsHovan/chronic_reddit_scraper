@@ -7,8 +7,8 @@ def main():
     Loads Reddit post data, processes each post using LLMExtractor,
     and saves the processed data.
     """
-    data_path = '/Users/julienh/Desktop/McGillWork/PainLexicon/chronic_reddit_scraper/posts_data_20250110_152846.json'  # Update with the actual path
-    output_path = 'processed_posts.json'  
+    data_path = '/Users/julienh/Desktop/McGillWork/PainLexicon/chronic_reddit_scraper/data/raw/posts_data_20250110_152846.json'  # Update with the actual path
+    output_path = '/Users/julienh/Desktop/McGillWork/PainLexicon/chronic_reddit_scraper/data/processed/processed_posts.json'
     num_posts_to_process = 500
 
     try:

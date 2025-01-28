@@ -4,54 +4,12 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 import json
 from config.headers import REDDIT_HEADERS
-from datetime import datetime, timedelta
+from datetime import datetime
 import random
-import time
 import os
-
-# Updated Configuration constants
-MAX_WORKERS = 5
-RATE_LIMIT_REQUESTS = 1000  # Maximum requests per minute
-REQUEST_DELAY = 0.5  # Delay between requests in seconds
-TOKEN_REFRESH_RATE = 60  # Refresh tokens every 60 seconds
-CHECKPOINT_INTERVAL = 100  # Save checkpoint every 100 processed posts
-
-class RateLimiter:
-    def __init__(self, max_tokens, refresh_rate):
-        self.max_tokens = max_tokens
-        self.tokens = max_tokens
-        self.refresh_rate = refresh_rate
-        self.last_refresh = time.time()
-        self.lock = asyncio.Lock()
-
-    async def acquire(self):
-        async with self.lock:
-            current_time = time.time()
-            time_passed = current_time - self.last_refresh
-            
-            # Refresh tokens if enough time has passed
-            if time_passed >= self.refresh_rate:
-                self.tokens = self.max_tokens
-                self.last_refresh = current_time
-            
-            # Wait if no tokens available
-            while self.tokens <= 0:
-                await asyncio.sleep(0.1)
-                current_time = time.time()
-                time_passed = current_time - self.last_refresh
-                if time_passed >= self.refresh_rate:
-                    self.tokens = self.max_tokens
-                    self.last_refresh = current_time
-            
-            self.tokens -= 1
-            await asyncio.sleep(REQUEST_DELAY)  # Add delay between requests
-
-def extract_post_id(url):
-    """Extract post ID from Reddit URL."""
-    try:
-        return f"t3_{url.split('/comments/')[1].split('/')[0]}"
-    except IndexError:
-        return None
+from config.constants import MAX_WORKERS, RATE_LIMIT_REQUESTS, TOKEN_REFRESH_RATE, CHECKPOINT_INTERVAL
+from scraper.src.session import RateLimiter
+from scraper.src.utils import extract_post_id, print_comment_tree
 
 async def scrape_post(session, url, semaphore, rate_limiter):
     """Updated scrape_post function with rate limiting"""
@@ -312,25 +270,6 @@ async def main():
         # Preview first few comments
         if post['comments']:
             print("\nFirst few comments:")
-            def print_comment_tree(comments, level=0, max_comments=3, current_count=0):
-                for comment in comments:
-                    if current_count >= max_comments:
-                        return current_count
-                    indent = "  " * level
-                    print(f"{indent}└─ Author: {comment['author']}")
-                    print(f"{indent}   Text: {comment['text'][:100]}...")
-                    current_count += 1
-                    if comment['replies']:
-                        current_count = print_comment_tree(
-                            comment['replies'], 
-                            level + 1, 
-                            max_comments, 
-                            current_count
-                        )
-                    if current_count >= max_comments:
-                        return current_count
-                return current_count
-            
             print_comment_tree(post['comments'])
         print("-" * 50)
 
