@@ -98,8 +98,8 @@ This scraper is designed with ethical data collection in mind:
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/yourusername/reddit-comment-tree-visualizer.git
-    cd reddit-comment-tree-visualizer
+    git clone https://github.com/JewelsHovan/chronic_reddit_scraper.git
+    cd chronic_reddit_scraper
     ```
 
 2. Install Python dependencies:
